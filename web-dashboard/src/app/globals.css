@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@theme inline {
+  --color-canvas: var(--bg-canvas);
+  --color-surface-subtle: var(--bg-surface-subtle);
+  --color-card-bg: var(--bg-card);
+  --color-card-elevated: var(--bg-card-elevated);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-accent-lime: #E3EF26;
+  --color-accent-teal: #076653;
+  --color-deep-forest: #0C342C;
+  --color-abyssal-dark: #06231D;
+  --color-void-black: #041411;
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-highlight: var(--border-highlight);
+  --color-border-inner: var(--border-inner);
+
+  --color-card-inner: var(--bg-card-inner);
+  --color-card-inner-selected: var(--bg-card-inner-selected);
+  --color-card-inner-hover: var(--bg-card-inner-hover);
+
+  /* Mapping gradients */
+  --background-image-gradient-dark-command: linear-gradient(135deg, #E3EF26 0%, #076653 50%, #0C342C 100%);
+  --background-image-gradient-light-eco: linear-gradient(135deg, #E2FBCE 0%, #E3EF26 50%, #076653 100%);
+  --background-image-gradient-abyssal: linear-gradient(180deg, #0C342C 0%, #06231D 50%, #041411 100%);
+
+  --font-philosopher: "Philosopher", serif;
+  --font-inter: "Inter", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
+
+  /* Retain standard variables for existing components */
+  --color-primary: var(--accent-lime);
+  --color-primary-foreground: var(--abyssal-dark);
+  --color-secondary: var(--accent-teal);
+  --color-muted-foreground: var(--text-muted);
+  --color-background: var(--bg-canvas);
+  --color-foreground: var(--text-primary);
+  --color-border: var(--border-subtle);
+  --color-surface: var(--bg-card);
+}
+
+@layer base {
+  /* DARK THEME - Deepest possible green/black */
+  :root {
+    --bg-canvas: #000000; /* Pure pitch black */
+    --bg-surface-subtle: #030F0C;
+    
+    --bg-card: rgba(6, 26, 21, 0.70);
+    --bg-card-elevated: rgba(9, 36, 29, 0.85);
+    
+    --border-subtle: rgba(7, 102, 83, 0.40);
+    --border-highlight: rgba(227, 239, 38, 0.25);
+    
+    --text-primary: #F4F9F4;
+    --text-secondary: #C2D6D0;
+    --text-muted: #6B8F86;
+
+    /* Inner Card Tokens - more poppy */
+    --bg-card-inner: rgba(12, 46, 37, 0.4);
+    --bg-card-inner-selected: rgba(19, 74, 62, 0.95);
+    --bg-card-inner-hover: rgba(14, 56, 46, 0.8);
+    --border-inner: rgba(7, 102, 83, 0.6);
+    
+    --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
+
+    --accent-primary: #E3EF26;
+  }
+}
+
+/* Glassmorphism & Depth Utilities */
+@layer utilities {
+  .glass-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-panel-elevated {
+    background: var(--bg-card-elevated);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-highlight);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(227, 239, 38, 0.15);
+  }
+
+  .glow-lime {
+    box-shadow: 0 0 20px -2px rgba(227, 239, 38, 0.35);
+  }
+
+  .glow-teal {
+    box-shadow: 0 0 20px -2px rgba(7, 102, 83, 0.5);
+  }
+
+  .gradient-border-top {
+    position: relative;
+  }
+
+  .gradient-border-top::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
+  }
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* MapLibre Popup Overrides */
+.maplibregl-popup-tip {
+  display: none !important;
+}
+
+.maplibregl-popup-content {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
