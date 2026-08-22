@@ -28,7 +28,21 @@ const CREW_COLORS: Record<CrewStatus, string> = {
   RETURNING: "#E3EF26",
 };
 
-export function IncidentMap({ showCrews = false }: { showCrews?: boolean } = {}) {
+interface IncidentMapProps {
+  showCrews?: boolean;
+  activeLayer?: boolean;
+  resolvedLayer?: boolean;
+  statusFilter?: ComplaintStatus | "ALL";
+  severityMin?: number;
+}
+
+export function IncidentMap({ 
+  showCrews = false,
+  activeLayer = true,
+  resolvedLayer = true,
+  statusFilter = "ALL",
+  severityMin = 0
+}: IncidentMapProps = {}) {
   const mapStyle: StyleSpecification = useMemo(() => {
     const baseUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png";
 
@@ -81,8 +95,18 @@ export function IncidentMap({ showCrews = false }: { showCrews?: boolean } = {})
   // Define markers declaratively
   const markers = useMemo(
     () =>
-      complaints.map((complaint) => {
-        const isSelected = complaint.id === selectedComplaintId;
+      complaints
+        .filter((complaint) => {
+          const isResolved = complaint.status === "RESOLVED";
+          if (isResolved && !resolvedLayer) return false;
+          if (!isResolved && !activeLayer) return false;
+          if (statusFilter !== "ALL" && complaint.status !== statusFilter) return false;
+          const severity = complaint.aiAnalysis?.severityScore ?? 0;
+          if (severity < severityMin) return false;
+          return true;
+        })
+        .map((complaint) => {
+          const isSelected = complaint.id === selectedComplaintId;
         const color = getSeverityColor(complaint.aiAnalysis?.severityScore);
         const label = getSeverityLabel(complaint.aiAnalysis?.severityScore);
 

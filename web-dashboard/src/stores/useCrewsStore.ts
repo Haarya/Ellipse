@@ -21,65 +21,46 @@ interface CrewsState {
   fetchCrews: () => Promise<void>;
   setCrews: (crews: FieldCrew[]) => void;
   selectCrew: (id: string | null) => void;
+  addCrew: (crewData: { name: string; vehicle: string; zone: string }) => Promise<void>;
 }
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-const MOCK_CREWS: FieldCrew[] = [
-  {
-    id: "crew-001",
-    name: "Team Alpha (Andheri)",
-    status: "AVAILABLE",
-    latitude: 19.1136,
-    longitude: 72.8697,
-    vehicle: "COMPACTOR",
-    lastPing: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-  },
-  {
-    id: "crew-002",
-    name: "Team Bravo (Bandra)",
-    status: "DISPATCHED",
-    latitude: 19.062,
-    longitude: 72.835,
-    vehicle: "MINI_TRUCK",
-    currentAssignmentId: "comp-005",
-    lastPing: new Date(Date.now() - 1000 * 45).toISOString(),
-  },
-  {
-    id: "crew-003",
-    name: "Team Charlie (Dadar)",
-    status: "ON_SITE",
-    latitude: 19.0213,
-    longitude: 72.8424,
-    vehicle: "HANDCART",
-    currentAssignmentId: "comp-003",
-    lastPing: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-  },
-  {
-    id: "crew-004",
-    name: "Team Delta (Sion)",
-    status: "RETURNING",
-    latitude: 19.039,
-    longitude: 72.8619,
-    vehicle: "MINI_TRUCK",
-    lastPing: new Date(Date.now() - 1000 * 60 * 1).toISOString(),
-  },
-];
-
 export const useCrewsStore = create<CrewsState>((set) => ({
-  crews: MOCK_CREWS,
+  crews: [],
   isLoading: false,
   error: null,
   selectedCrewId: null,
   fetchCrews: async () => {
     set({ isLoading: true, error: null });
     try {
-      await delay(500); // Simulate API call
-      set({ crews: MOCK_CREWS, isLoading: false });
+      const res = await fetch("http://localhost:3000/api/v1/internal/crews", {
+        headers: { "x-ai-service-secret": "ellipse-ai-webhook-secret-67890" }
+      });
+      if (!res.ok) throw new Error("Failed to fetch crews");
+      const data = await res.json();
+      set({ crews: data, isLoading: false });
     } catch {
       set({ error: "Failed to fetch crews", isLoading: false });
     }
   },
   setCrews: (crews) => set({ crews }),
   selectCrew: (id) => set({ selectedCrewId: id }),
+  addCrew: async (crewData: { name: string; vehicle: string; zone: string }) => {
+    try {
+      const res = await fetch("http://localhost:3000/api/v1/internal/crews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-ai-service-secret": "ellipse-ai-webhook-secret-67890"
+        },
+        body: JSON.stringify(crewData)
+      });
+      if (!res.ok) throw new Error("Failed to add crew");
+      const newCrew = await res.json();
+      set((state) => ({ crews: [...state.crews, newCrew] }));
+    } catch (error) {
+      console.error("Failed to add crew", error);
+    }
+  }
 }));
