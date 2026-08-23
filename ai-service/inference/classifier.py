@@ -77,14 +77,14 @@ class HierarchicalClassifier:
     """
 
     def __init__(self):
-        logger.info("Loading MobileCLIP-S0 model (pre-warming)...")
+        logger.info("Loading MobileCLIP-S1 model (pre-warming)...")
         
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
         self.model, _, self.preprocess = open_clip.create_model_and_transforms(
-            "MobileCLIP-S0", pretrained="datacomp"
+            "MobileCLIP-S1", pretrained="datacompdr"
         )
-        self.tokenizer = open_clip.get_tokenizer("MobileCLIP-S0")
+        self.tokenizer = open_clip.get_tokenizer("MobileCLIP-S1")
         self.model = self.model.to(self.device)
         self.model.eval()
         
