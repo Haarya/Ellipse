@@ -112,6 +112,8 @@ model AiAnalysis {
   volumeMethod            VolumeMethod?         @map("volume_method")
   category                String?               @map("category")
   sizeEstimate            String?               @map("size_estimate")
+  macroCategory           String?               @map("macro_category")
+  microCategory           String?               @map("micro_category")
   severityScore           Float?                @map("severity_score")
   severityWeightVersionId Int?                  @map("severity_weight_version_id")
   severityWeightVersion   SeverityWeightVersion? @relation(fields: [severityWeightVersionId], references: [id])

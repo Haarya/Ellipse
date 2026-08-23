@@ -25,6 +25,8 @@ export interface AiAnalysis {
   severityScore: number;
   hazardFlags: string[];
   logisticsTier: LogisticsTier;
+  macroCategory?: string;
+  microCategory?: string;
 }
 
 export interface Complaint {
