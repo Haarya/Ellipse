@@ -1,10 +1,12 @@
-def compute_severity(detection_results, classification_results, volume_metrics):
+def compute_severity(detection_results, classification_results, volume_metrics=None):
     """
     Computes a severity score (0.0 to 1.0) and assigns a logistics tier (1 to 4).
     Based on metric volume estimation and MobileCLIP classification types.
     """
     
     # 1. Base score from volume (m3)
+    if volume_metrics is None:
+        volume_metrics = {}
     volume_m3 = volume_metrics.get("volumeM3", 0.0)
     
     # Scale: < 0.1m3 is trivial, 3.0m3 is massive
