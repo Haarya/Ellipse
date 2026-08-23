@@ -19,7 +19,16 @@ export class ComplaintService {
     // Append photo
     const filename = params.photoUri.split('/').pop() || 'photo.jpg';
     const match = /\.(\w+)$/.exec(filename);
-    const type = match ? `image/${match[1]}` : `image`;
+    let type = 'image/jpeg'; // default fallback
+    
+    if (match) {
+      const ext = match[1].toLowerCase();
+      if (ext === 'jpg') {
+        type = 'image/jpeg';
+      } else {
+        type = `image/${ext}`;
+      }
+    }
     
     formData.append('photo', {
       uri: params.photoUri,
