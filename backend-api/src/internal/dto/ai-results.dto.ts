@@ -23,4 +23,12 @@ export class AiResultsDto {
   @IsOptional()
   @IsString()
   sizeEstimate?: string;
+
+  @IsOptional()
+  @IsString()
+  macroCategory?: string;
+
+  @IsOptional()
+  @IsString()
+  microCategory?: string;
 }

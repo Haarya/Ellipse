@@ -11,10 +11,10 @@ load_dotenv()
 app = FastAPI(title="Ellipse AI Service")
 logger = logging.getLogger("uvicorn")
 
-# Load pipeline globally
+# Load pipeline globally (pre-warms MobileCLIP at startup)
 try:
-    pipeline = AIPipeline("../best.onnx", "../best_classifier.onnx")
-    logger.info("Successfully loaded ONNX models.")
+    pipeline = AIPipeline("../best.onnx")
+    logger.info("Successfully loaded YOLO detector + MobileCLIP classifier.")
 except Exception as e:
     logger.error(f"Failed to load models: {e}")
     # Still start app, but calls will fail if models aren't loaded properly

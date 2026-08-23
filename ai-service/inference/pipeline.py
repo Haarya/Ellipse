@@ -2,13 +2,14 @@ import httpx
 from PIL import Image
 from io import BytesIO
 from .detector import GarbageDetector
-from .classifier import GarbageClassifier
+from .classifier import HierarchicalClassifier
 from .severity import compute_severity
 
+
 class AIPipeline:
-    def __init__(self, detector_path: str, classifier_path: str):
+    def __init__(self, detector_path: str):
         self.detector = GarbageDetector(detector_path)
-        self.classifier = GarbageClassifier(classifier_path)
+        self.classifier = HierarchicalClassifier()
 
     async def download_image(self, url: str) -> Image.Image:
         async with httpx.AsyncClient() as client:
@@ -29,10 +30,12 @@ class AIPipeline:
                 "hazardFlags": [],
                 "volumeM3": 0.0,
                 "category": None,
-                "sizeEstimate": manual_size_estimate
+                "sizeEstimate": manual_size_estimate,
+                "macroCategory": None,
+                "microCategory": None,
             }
 
-        # 3. Classify each detected region
+        # 3. Classify each detected region using hierarchical MobileCLIP
         classifications = []
         for det in detections:
             box = det["box"] # x1, y1, x2, y2
@@ -52,13 +55,13 @@ class AIPipeline:
             cls_result = self.classifier.classify(crop)
             classifications.append(cls_result)
             
-        # 4. Compute severity
+        # 4. Compute severity (uses legacy "class" field — unchanged)
         severity_result = compute_severity(detections, classifications)
         
-        # 5. Compile unique waste classes
+        # 5. Compile unique waste classes (legacy)
         unique_classes = list(set([c["class"] for c in classifications]))
         
-        # Determine category (most severe)
+        # Determine category (most severe — unchanged logic)
         category = "Recyclable"
         if "hazardous" in unique_classes:
             category = "Hazardous"
@@ -66,6 +69,12 @@ class AIPipeline:
             category = "Non-recyclable"
         elif "organic" in unique_classes:
             category = "Organic"
+
+        # 6. Aggregate hierarchical labels (NEW)
+        #    Pick the macro/micro from the highest-confidence crop
+        best_crop = max(classifications, key=lambda c: c["macro_score"])
+        macro_category = best_crop["macro_label"]
+        micro_category = best_crop.get("micro_label")
             
         # Determine size estimate if not manually provided
         size_estimate = manual_size_estimate
@@ -87,4 +96,6 @@ class AIPipeline:
             "volumeM3": len(detections) * 0.1, # Dummy volume estimate
             "category": category,
             "sizeEstimate": size_estimate,
+            "macroCategory": macro_category,
+            "microCategory": micro_category,
         }

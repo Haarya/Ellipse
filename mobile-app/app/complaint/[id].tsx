@@ -105,12 +105,19 @@ export default function ComplaintDetailScreen() {
 
         <View style={styles.cardRow}>
           <Text style={styles.cardLabel}>Category:</Text>
-          <Text style={styles.cardValue}>{ai.category || 'N/A'}</Text>
+          <Text style={styles.cardValue}>{ai.macroCategory || ai.category || 'N/A'}</Text>
         </View>
+
+        {ai.microCategory && (
+          <View style={styles.cardRow}>
+            <Text style={styles.cardLabel}>Specific Type:</Text>
+            <Text style={styles.cardValue}>{ai.microCategory}</Text>
+          </View>
+        )}
 
         <View style={styles.cardRow}>
           <Text style={styles.cardLabel}>Waste Types:</Text>
-          <Text style={styles.cardValue}>{ai.wasteTypes?.join(', ') || 'N/A'}</Text>
+          <Text style={styles.cardValue}>{ai.wasteTypes?.length > 0 ? ai.wasteTypes.join(', ') : 'No garbage detected'}</Text>
         </View>
 
         <View style={styles.cardRow}>

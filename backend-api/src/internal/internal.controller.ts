@@ -45,6 +45,8 @@ export class InternalController {
             severityScore: dto.severityScore || 0,
             category: dto.category,
             sizeEstimate: dto.sizeEstimate,
+            macroCategory: dto.macroCategory,
+            microCategory: dto.microCategory,
             // Assuming weight version 1 exists for now, since it's an Int relation
             severityWeightVersionId: 1, 
           },

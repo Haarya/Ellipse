@@ -8,3 +8,5 @@ python-dotenv
 python-multipart
 pydantic
 opencv-python-headless
+torch --index-url https://download.pytorch.org/whl/cpu
+open_clip_torch
