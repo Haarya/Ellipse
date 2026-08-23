@@ -49,11 +49,11 @@ class VolumeEstimator:
         """
         H, W = depth_z.shape
         
-        # Extract metadata with fallbacks
-        zoom = metadata.get("zoomRatio", 1.0)
-        f_base = metadata.get("focalLength", 26.0) # Assume 26mm eq. wide angle
-        sensor_w = metadata.get("sensorWidth", 6.4) # mm
-        sensor_h = metadata.get("sensorHeight", 4.8) # mm
+        # Extract metadata with fallbacks for None values
+        zoom = metadata.get("zoomRatio") or 1.0
+        f_base = metadata.get("focalLength") or 26.0 # Assume 26mm eq. wide angle
+        sensor_w = metadata.get("sensorWidth") or 6.4 # mm
+        sensor_h = metadata.get("sensorHeight") or 4.8 # mm
         
         # Pinhole normalization
         f_eff = f_base * zoom
