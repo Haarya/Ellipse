@@ -4,6 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { TriageList } from "@/components/triage/TriageList";
 import { DispatchModal } from "@/components/triage/DispatchModal";
+import { CreateCrewModal } from "@/components/crews/CreateCrewModal";
 
 // MapLibre uses browser APIs — must be dynamically imported with ssr: false
 const IncidentMap = dynamic(
@@ -23,6 +24,7 @@ const IncidentMap = dynamic(
 
 export default function TriagePage() {
   const [dispatchingId, setDispatchingId] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col gap-4">
@@ -35,6 +37,12 @@ export default function TriagePage() {
             Live incident queue · Click a pin or card to select
           </p>
         </div>
+        <button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="bg-accent-lime text-background px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
+        >
+          + Create Team
+        </button>
       </div>
 
       <div className="flex-1 grid grid-cols-[360px_1fr] gap-4 min-h-0">
@@ -46,7 +54,7 @@ export default function TriagePage() {
         {/* Right: MapLibre Map */}
         <div className="min-h-0 flex flex-col glass-panel rounded-xl overflow-hidden hover:border-border-highlight transition-all duration-300 gradient-border-top group hover:-translate-y-1 relative glow-teal">
           <div className="flex-1 min-h-0 relative z-10 border border-border-highlight m-3 rounded-xl overflow-hidden">
-            <IncidentMap resolvedLayer={false} />
+            <IncidentMap showCrews={true} resolvedLayer={false} />
           </div>
         </div>
       </div>
@@ -57,6 +65,11 @@ export default function TriagePage() {
           complaintId={dispatchingId}
           onClose={() => setDispatchingId(null)}
         />
+      )}
+
+      {/* Create Crew Modal */}
+      {isCreateModalOpen && (
+        <CreateCrewModal onClose={() => setIsCreateModalOpen(false)} />
       )}
     </div>
   );

@@ -13,11 +13,7 @@ const VEHICLE_OPTIONS: { value: string; label: string; tier: LogisticsTier[] }[]
 
 const PPE_OPTIONS = ["Gloves", "Mask", "Boots", "Hazmat Suit", "Safety Vest"];
 
-const MOCK_CREWS = [
-  { id: "crew-001", name: "Alpha Squad", available: true },
-  { id: "crew-002", name: "Beta Unit", available: true },
-  { id: "crew-003", name: "Gamma Team", available: false },
-];
+import { useCrewsStore } from "@/stores/useCrewsStore";
 
 interface DispatchModalProps {
   complaintId: string;
@@ -26,6 +22,7 @@ interface DispatchModalProps {
 
 export function DispatchModal({ complaintId, onClose }: DispatchModalProps) {
   const { complaints, updateComplaintStatus } = useComplaintsStore();
+  const { crews, updateCrew } = useCrewsStore();
   const complaint = complaints.find((c) => c.id === complaintId);
 
   const [selectedVehicle, setSelectedVehicle] = useState<string>(
@@ -50,10 +47,19 @@ export function DispatchModal({ complaintId, onClose }: DispatchModalProps) {
   };
 
   const handleDispatch = async () => {
-    if (!selectedCrew) return;
+    if (!selectedCrew || !complaint) return;
     setIsDispatching(true);
     // Simulate API call
     await new Promise((r) => setTimeout(r, 1000));
+    
+    // Assign crew to complaint
+    updateCrew(selectedCrew, { 
+      status: "DISPATCHED", 
+      currentAssignmentId: complaintId,
+      latitude: complaint.latitude,
+      longitude: complaint.longitude
+    });
+    
     updateComplaintStatus(complaintId, "DISPATCHED");
     setIsDispatching(false);
     onClose();
@@ -121,32 +127,41 @@ export function DispatchModal({ complaintId, onClose }: DispatchModalProps) {
             <User className="w-3 h-3" /> Assign Field Crew
           </label>
           <div className="space-y-2">
-            {MOCK_CREWS.map((crew) => (
-              <button
-                key={crew.id}
-                onClick={() => crew.available && setSelectedCrew(crew.id)}
-                disabled={!crew.available}
-                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg border transition-all font-inter text-sm ${
-                  selectedCrew === crew.id
-                    ? "bg-card-inner-selected border-border-highlight text-accent-lime font-semibold"
-                    : "bg-card-inner border-border-inner text-text-primary hover:bg-card-inner-hover"
-                }`}
-                style={{ opacity: !crew.available ? 0.5 : 1 }}
-              >
-                <span>{crew.name}</span>
-                <span
-                  className="text-xs px-2 py-0.5 rounded"
-                  style={{
-                    background: crew.available
-                      ? "rgba(46,213,115,0.15)"
-                      : "rgba(176,176,176,0.15)",
-                    color: crew.available ? "#2ED573" : "#B0B0B0",
-                  }}
+            {crews.map((crew) => {
+              const isAvailable = crew.status === "AVAILABLE";
+              return (
+                <button
+                  key={crew.id}
+                  onClick={() => isAvailable && setSelectedCrew(crew.id)}
+                  disabled={!isAvailable}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg border transition-all font-inter text-sm ${
+                    selectedCrew === crew.id
+                      ? "bg-card-inner-selected border-border-highlight text-accent-lime font-semibold"
+                      : "bg-card-inner border-border-inner text-text-primary hover:bg-card-inner-hover"
+                  }`}
+                  style={{ opacity: !isAvailable ? 0.5 : 1 }}
                 >
-                  {crew.available ? "Available" : "Busy"}
-                </span>
-              </button>
-            ))}
+                  <span>{crew.name}</span>
+                  <span
+                    className="text-xs px-2 py-0.5 rounded"
+                    style={{
+                      background: isAvailable
+                        ? "rgba(46,213,115,0.15)"
+                        : "rgba(176,176,176,0.15)",
+                      color: isAvailable ? "#2ED573" : "#B0B0B0",
+                    }}
+                  >
+                    {isAvailable ? "Available" : "Busy"}
+                  </span>
+                </button>
+              );
+            })}
+            
+            {crews.length === 0 && (
+              <div className="text-center text-sm text-muted-foreground py-4 border border-border border-dashed rounded-lg">
+                No crews created yet. Create a team in the Field Crews section.
+              </div>
+            )}
           </div>
         </div>
 

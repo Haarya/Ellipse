@@ -2,8 +2,9 @@
 
 import { useCrewsStore, FieldCrew } from "@/stores/useCrewsStore";
 import { formatDistanceToNow } from "date-fns";
-import { MapPin, Truck, Users, Trash2 } from "lucide-react";
+import { MapPin, Truck, Users, Trash2, Navigation } from "lucide-react";
 import { useComplaintsStore } from "@/stores/useComplaintsStore";
+import { getLocationName } from "@/utils/location";
 
 const STATUS_CONFIG = {
   AVAILABLE:  { label: "Available",  color: "#2ED573" },
@@ -54,6 +55,7 @@ function CrewCard({ crew, isSelected, onSelect }: { crew: FieldCrew, isSelected:
           <Truck className="w-4 h-4" />
           <span>{crew.vehicle.replace("_", " ")}</span>
         </div>
+        
         {crew.currentAssignmentId ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground font-inter">
             <MapPin className="w-4 h-4" />
@@ -65,6 +67,11 @@ function CrewCard({ crew, isSelected, onSelect }: { crew: FieldCrew, isSelected:
             <span>Awaiting dispatch</span>
           </div>
         )}
+        
+        <div className="flex items-center gap-2 text-xs text-muted-foreground font-jetbrains-mono bg-background/50 p-1.5 rounded-md border border-border">
+          <Navigation className="w-3 h-3 text-accent-lime" />
+          <span className="text-foreground font-inter">{getLocationName(crew.latitude, crew.longitude)}</span>
+        </div>
       </div>
 
       <div className="flex items-center gap-1.5 pt-3 border-t border-border">

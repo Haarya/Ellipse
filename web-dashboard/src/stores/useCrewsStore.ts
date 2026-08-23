@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export type CrewStatus = "AVAILABLE" | "DISPATCHED" | "ON_SITE" | "RETURNING";
 
@@ -23,12 +24,13 @@ interface CrewsState {
   setCrews: (crews: FieldCrew[]) => void;
   selectCrew: (id: string | null) => void;
   addCrew: (crewData: { name: string; vehicle: string; zone?: string; teamSize: number; latitude: number; longitude: number }) => Promise<void>;
+  updateCrew: (id: string, updates: Partial<FieldCrew>) => void;
   deleteCrew: (id: string) => Promise<void>;
 }
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-
-export const useCrewsStore = create<CrewsState>((set) => ({
+export const useCrewsStore = create<CrewsState>()(
+  persist(
+    (set) => ({
   crews: [],
   isLoading: false,
   error: null,
@@ -41,7 +43,26 @@ export const useCrewsStore = create<CrewsState>((set) => ({
       });
       if (!res.ok) throw new Error("Failed to fetch crews");
       const data = await res.json();
-      set({ crews: data, isLoading: false });
+      
+      set((state) => {
+        // Merge fetched data with local state to preserve local status/location updates
+        const mergedCrews = data.map((fetchedCrew: FieldCrew) => {
+          const localCrew = state.crews.find(c => c.id === fetchedCrew.id);
+          // If the crew was locally dispatched/on-site, preserve their status and assignment
+          if (localCrew && localCrew.status !== 'AVAILABLE') {
+            return {
+              ...fetchedCrew,
+              status: localCrew.status,
+              latitude: localCrew.latitude,
+              longitude: localCrew.longitude,
+              currentAssignmentId: localCrew.currentAssignmentId
+            };
+          }
+          return fetchedCrew;
+        });
+        
+        return { crews: mergedCrews, isLoading: false };
+      });
     } catch {
       set({ error: "Failed to fetch crews", isLoading: false });
     }
@@ -65,6 +86,9 @@ export const useCrewsStore = create<CrewsState>((set) => ({
       console.error("Failed to add crew", error);
     }
   },
+  updateCrew: (id, updates) => set((state) => ({
+    crews: state.crews.map(crew => crew.id === id ? { ...crew, ...updates } : crew)
+  })),
   deleteCrew: async (id: string) => {
     try {
       const res = await fetch(`http://localhost:3000/api/v1/internal/crews/${id}`, {
@@ -82,4 +106,9 @@ export const useCrewsStore = create<CrewsState>((set) => ({
       console.error("Failed to delete crew", error);
     }
   }
-}));
+    }),
+    {
+      name: "ellipse-crews-storage", // name of the item in the storage (must be unique)
+    }
+  )
+);

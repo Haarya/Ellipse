@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 import { useComplaintsStore } from "@/stores/useComplaintsStore";
+import { useCrewsStore } from "@/stores/useCrewsStore";
 
 const NO_SHELL_ROUTES = ["/login", "/landing"];
 
@@ -12,12 +13,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isShellless = NO_SHELL_ROUTES.some((r) => pathname.startsWith(r));
   const fetchComplaints = useComplaintsStore((state) => state.fetchComplaints);
+  const fetchCrews = useCrewsStore((state) => state.fetchCrews);
 
   useEffect(() => {
     if (!isShellless) {
       fetchComplaints();
+      fetchCrews();
     }
-  }, [isShellless, fetchComplaints]);
+  }, [isShellless, fetchComplaints, fetchCrews]);
 
   if (isShellless) {
     return <>{children}</>;

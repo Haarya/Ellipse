@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useCrewsStore } from "./useCrewsStore";
 
 export type WasteClass =
   | "Recyclables"
@@ -206,8 +207,19 @@ export const useComplaintsStore = create<ComplaintsState>((set) => ({
         headers: { "x-ai-service-secret": "ellipse-ai-webhook-secret-67890" }
       });
       if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
+      const data: Complaint[] = await res.json();
       set({ complaints: data, isLoading: false });
+
+      // Sync crews: if a crew is assigned to a resolved/missing complaint, free them up
+      const { crews, updateCrew } = useCrewsStore.getState();
+      crews.forEach(crew => {
+        if (crew.status !== "AVAILABLE" && crew.currentAssignmentId) {
+          const complaint = data.find(c => c.id === crew.currentAssignmentId);
+          if (!complaint || complaint.status === "RESOLVED" || complaint.status === "REJECTED" || complaint.status === "DUPLICATE") {
+            updateCrew(crew.id, { status: "AVAILABLE", currentAssignmentId: undefined });
+          }
+        }
+      });
     } catch {
       set({ error: "Failed to fetch complaints", isLoading: false });
     }
@@ -237,6 +249,15 @@ export const useComplaintsStore = create<ComplaintsState>((set) => ({
           c.id === id ? { ...c, status } : c
         ),
       }));
+
+      // If the complaint is marked as RESOLVED, free up the assigned crew
+      if (status === "RESOLVED") {
+        const { crews, updateCrew } = useCrewsStore.getState();
+        const assignedCrew = crews.find(c => c.currentAssignmentId === id);
+        if (assignedCrew) {
+          updateCrew(assignedCrew.id, { status: "AVAILABLE", currentAssignmentId: undefined });
+        }
+      }
     } catch (err) {
       console.error("Failed to update status", err);
     }
