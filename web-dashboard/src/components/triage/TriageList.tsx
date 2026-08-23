@@ -152,11 +152,9 @@ export function TriageList({ onDispatch }: TriageListProps) {
   const { complaints, selectedComplaintId, selectComplaint, flyToComplaint } =
     useComplaintsStore();
 
-  // Sort by severity score descending, pending at bottom
+  // Sort by date descending (newest on top)
   const sorted = [...complaints].sort((a, b) => {
-    const scoreA = a.aiAnalysis?.severityScore ?? -1;
-    const scoreB = b.aiAnalysis?.severityScore ?? -1;
-    return scoreB - scoreA;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   return (
