@@ -101,40 +101,57 @@ export class InternalController {
     const resolved = allComplaints.filter(c => c.status === 'RESOLVED').length;
     const resolutionRate = total === 0 ? 0 : Math.round((resolved / total) * 100);
 
-    // Mock trend, ward performance, and some stats for now, but compute real severity/waste
+    // Trend calculation
+    const now = new Date();
+    const past7Days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (6 - i));
+      return {
+        dateString: d.toISOString().split('T')[0],
+        label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        value: 0
+      };
+    });
+
     let critical = 0;
     let moderate = 0;
     let low = 0;
     const wasteCount: Record<string, number> = {};
 
     allComplaints.forEach(c => {
+      // Trend
+      const createdStr = new Date(c.createdAt).toISOString().split('T')[0];
+      const dayData = past7Days.find(d => d.dateString === createdStr);
+      if (dayData) {
+        dayData.value++;
+      }
+
       if (c.aiAnalysis) {
         const score = c.aiAnalysis.severityScore || 0;
         if (score >= 0.75) critical++;
         else if (score >= 0.5) moderate++;
         else low++;
 
-        if (Array.isArray(c.aiAnalysis.wasteClasses)) {
-          (c.aiAnalysis.wasteClasses as string[]).forEach((w: string) => {
-            wasteCount[w] = (wasteCount[w] || 0) + 1;
-          });
+        const category = c.aiAnalysis.macroCategory || c.aiAnalysis.category;
+        if (category) {
+          wasteCount[category] = (wasteCount[category] || 0) + 1;
         }
       } else {
         low++; // Pending AI
       }
     });
 
-    const totalAi = allComplaints.filter(c => c.aiAnalysis).length || 1; // avoid / 0
+    const totalAiWithCategory = allComplaints.filter(c => c.aiAnalysis && (c.aiAnalysis.macroCategory || c.aiAnalysis.category)).length || 1; // avoid / 0
+
+    const colorPalette = ["#00CEC9", "#6C5CE7", "#2ED573", "#54A0FF", "#FF4D4D", "#FF9F43", "#FD79A8", "#FECA57", "#A55EEA"];
+    let colorIndex = 0;
 
     const wasteDistribution = Object.entries(wasteCount).map(([label, count]) => {
-      let color = "#FECA57";
-      if (label === "Organic") color = "#2ED573";
-      if (label === "Recyclables") color = "#54A0FF";
-      if (label === "Hazardous") color = "#FF4D4D";
-      if (label === "Bulk Dump") color = "#FF9F43";
+      const color = colorPalette[colorIndex % colorPalette.length];
+      colorIndex++;
       return {
         label,
-        value: Math.round((count / totalAi) * 100),
+        value: Math.round((count / totalAiWithCategory) * 100),
         color
       };
     });
@@ -144,16 +161,9 @@ export class InternalController {
         totalComplaintsThisMonth: total,
         resolutionRate,
         avgResponseTimeHours: 12.5, // Mock
-        slaComplianceRate: 85.0, // Mock
         activeHotspots: 3, // Mock
       },
-      complaintsTrend: [
-        { label: "Mon", value: 12 },
-        { label: "Tue", value: 15 },
-        { label: "Wed", value: 18 },
-        { label: "Thu", value: 10 },
-        { label: "Fri", value: total },
-      ],
+      complaintsTrend: past7Days.map(d => ({ label: d.label, value: d.value })),
       wasteDistribution: wasteDistribution.length > 0 ? wasteDistribution : [
         { label: "No Data", value: 100, color: "#54A0FF" }
       ],

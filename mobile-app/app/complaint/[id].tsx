@@ -105,7 +105,7 @@ export default function ComplaintDetailScreen() {
 
         <View style={styles.cardRow}>
           <Text style={styles.cardLabel}>Category:</Text>
-          <Text style={styles.cardValue}>{ai.macroCategory || ai.category || 'N/A'}</Text>
+          <Text style={styles.cardValue}>{ai.microCategory || ai.macroCategory || ai.category || 'N/A'}</Text>
         </View>
 
         {ai.microCategory && (

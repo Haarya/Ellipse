@@ -4,7 +4,6 @@ export interface AnalyticsStats {
   totalComplaintsThisMonth: number;
   resolutionRate: number; // percentage
   avgResponseTimeHours: number;
-  slaComplianceRate: number; // percentage
   activeHotspots: number;
 }
 
@@ -39,7 +38,6 @@ const INITIAL_STATE = {
     totalComplaintsThisMonth: 0,
     resolutionRate: 0,
     avgResponseTimeHours: 0,
-    slaComplianceRate: 0,
     activeHotspots: 0,
   },
   complaintsTrend: [],

@@ -39,7 +39,7 @@ export function CrewDashboard() {
         <Text style={styles.date}>{new Date(item.createdAt).toLocaleDateString()}</Text>
       </View>
       <Text style={styles.title}>
-        {item.aiAnalysis?.wasteClasses?.[0] || 'Unclassified Waste'}
+        {item.aiAnalysis?.microCategory || item.aiAnalysis?.macroCategory || item.aiAnalysis?.wasteClasses?.[0] || 'Unclassified Waste'}
       </Text>
       <View style={styles.cardFooter}>
         <View style={styles.locationContainer}>

@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState, useRef, useEffect } from "react";
-import Map, { Marker, Popup, NavigationControl, MapRef } from "react-map-gl/maplibre";
+import Map, { Marker, Popup, NavigationControl, MapRef, Source, Layer } from "react-map-gl/maplibre";
 import type { StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useComplaintsStore, Complaint } from "@/stores/useComplaintsStore";
+import { useComplaintsStore, Complaint, ComplaintStatus } from "@/stores/useComplaintsStore";
 import { useCrewsStore, CrewStatus } from "@/stores/useCrewsStore";
 
 function getSeverityColor(score: number | undefined): string {
@@ -34,6 +34,8 @@ interface IncidentMapProps {
   resolvedLayer?: boolean;
   statusFilter?: ComplaintStatus | "ALL";
   severityMin?: number;
+  heatmapLayer?: boolean;
+  wardsLayer?: boolean;
 }
 
 export function IncidentMap({ 
@@ -41,7 +43,9 @@ export function IncidentMap({
   activeLayer = true,
   resolvedLayer = true,
   statusFilter = "ALL",
-  severityMin = 0
+  severityMin = 0,
+  heatmapLayer = false,
+  wardsLayer = false
 }: IncidentMapProps = {}) {
   const mapStyle: StyleSpecification = useMemo(() => {
     const baseUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png";
@@ -152,7 +156,7 @@ export function IncidentMap({
           </Marker>
         );
       }),
-    [complaints, selectedComplaintId, selectComplaint, flyToComplaint]
+    [complaints, selectedComplaintId, selectComplaint, flyToComplaint, activeLayer, resolvedLayer, statusFilter, severityMin]
   );
 
   return (
@@ -169,6 +173,45 @@ export function IncidentMap({
       >
         <NavigationControl position="top-right" />
         
+        {heatmapLayer && (
+          <Source id="heatmap-data" type="geojson" data={{ type: 'FeatureCollection', features: complaints.map(c => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [c.longitude, c.latitude] }, properties: { weight: c.aiAnalysis?.severityScore ?? 0.5 } })) }}>
+            <Layer
+              id="heatmap-layer"
+              type="heatmap"
+              paint={{
+                'heatmap-weight': ['get', 'weight'],
+                'heatmap-intensity': 1,
+                'heatmap-color': [
+                  'interpolate',
+                  ['linear'],
+                  ['heatmap-density'],
+                  0, 'rgba(0, 255, 0, 0)',
+                  0.2, 'rgba(254, 202, 87, 0.5)',
+                  0.5, 'rgba(255, 159, 67, 0.8)',
+                  1, 'rgba(255, 77, 77, 1)'
+                ],
+                'heatmap-radius': 30,
+                'heatmap-opacity': 0.7
+              }}
+            />
+          </Source>
+        )}
+
+        {wardsLayer && (
+          <Source id="wards-data" type="geojson" data={{ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[-74.02, 40.70], [-73.98, 40.70], [-73.98, 40.74], [-74.02, 40.74], [-74.02, 40.70]]] }, properties: {} }] }}>
+            <Layer
+              id="wards-layer"
+              type="line"
+              paint={{
+                'line-color': '#54A0FF',
+                'line-width': 2,
+                'line-opacity': 0.5,
+                'line-dasharray': [2, 2]
+              }}
+            />
+          </Source>
+        )}
+
         {markers}
 
         {showCrews && crews.map((crew) => {

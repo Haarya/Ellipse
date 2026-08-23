@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useAnalyticsStore } from "@/stores/useAnalyticsStore";
 import { AlertCircle, TrendingUp, Clock, MapPin, Activity, Loader2 } from "lucide-react";
+import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function AnalyticsPage() {
   const { stats, complaintsTrend, wasteDistribution, wardPerformance, severityBreakdown, isLoading, fetchAnalytics } = useAnalyticsStore();
@@ -10,8 +11,6 @@ export default function AnalyticsPage() {
   useEffect(() => {
     fetchAnalytics();
   }, [fetchAnalytics]);
-
-  const maxTrend = Math.max(...complaintsTrend.map(d => d.value));
 
   if (isLoading) {
     return (
@@ -29,12 +28,11 @@ export default function AnalyticsPage() {
       </div>
 
       {/* KPI Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Complaints", value: stats.totalComplaintsThisMonth, icon: Activity, color: "text-foreground" },
           { label: "Resolution Rate", value: `${stats.resolutionRate}%`, icon: TrendingUp, color: "text-primary" },
           { label: "Avg Response Time", value: `${stats.avgResponseTimeHours}h`, icon: Clock, color: "text-accent" },
-          { label: "SLA Compliance", value: `${stats.slaComplianceRate}%`, icon: AlertCircle, color: "text-secondary-foreground" },
           { label: "Active Hotspots", value: stats.activeHotspots, icon: MapPin, color: "text-destructive" },
         ].map((kpi, i) => (
           <div key={i} className="glass-panel rounded-xl p-4 flex flex-col gap-3 hover:border-border-highlight transition-all duration-300 gradient-border-top group hover:-translate-y-1">
@@ -48,28 +46,43 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trend Chart (Bar) */}
+        {/* Trend Chart (Line Graph) */}
         <div className="lg:col-span-2 glass-panel rounded-xl p-5 flex flex-col hover:border-border-highlight transition-all duration-300 gradient-border-top group hover:-translate-y-1">
-          <h3 className="text-sm font-inter font-semibold text-foreground mb-6">Complaints Trend (Last 7 Days)</h3>
-          <div className="flex-1 flex items-end gap-2 sm:gap-6 min-h-[200px]">
-            {complaintsTrend.map((point, i) => {
-              const heightPct = (point.value / maxTrend) * 100;
-              return (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                  <div className="relative w-full h-full flex flex-col justify-end">
-                    <div 
-                      className="w-full bg-primary/20 hover:bg-primary/40 rounded-t-sm transition-all relative border-t border-primary/50"
-                      style={{ height: `${heightPct}%` }}
-                    >
-                      <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-jetbrains-mono opacity-0 group-hover:opacity-100 transition-opacity bg-background px-1.5 py-0.5 rounded border border-border">
-                        {point.value}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-xs font-inter text-muted-foreground">{point.label}</span>
-                </div>
-              );
-            })}
+          <h3 className="text-sm font-inter font-semibold text-foreground mb-4">Complaints Trend (Last 7 Days)</h3>
+          <div className="flex-1 min-h-[220px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={complaintsTrend} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#E3EF26" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#E3EF26" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <XAxis 
+                  dataKey="label" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 11, fill: '#8b949e', fontFamily: 'Inter' }} 
+                  dy={10}
+                />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#061f1a', borderColor: '#2ED573', borderRadius: '8px', fontSize: '12px', fontFamily: 'JetBrains Mono', color: '#E3EF26' }}
+                  itemStyle={{ color: '#E3EF26' }}
+                  labelStyle={{ color: '#8b949e', marginBottom: '4px' }}
+                  formatter={(value: any) => [`${value} complaints`, '']}
+                  cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1 }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="#E3EF26" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorValue)" 
+                  activeDot={{ r: 5, fill: '#134A3E', stroke: '#E3EF26', strokeWidth: 2 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -136,31 +149,24 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Waste Distribution (CSS Donut approximation using stacked progress bars for now) */}
+        {/* Waste Distribution (Horizontal Bars) */}
         <div className="glass-panel rounded-xl p-5 flex flex-col hover:border-border-highlight transition-all duration-300 gradient-border-top group hover:-translate-y-1">
           <h3 className="text-sm font-inter font-semibold text-foreground mb-6">Waste Type Distribution</h3>
-          
-          <div className="flex-1 flex flex-col justify-center gap-6">
-            <div className="w-full flex h-4 rounded-full overflow-hidden mb-2">
-              {wasteDistribution.map((item, i) => (
-                <div 
-                  key={i} 
-                  className="h-full" 
-                  style={{ width: `${item.value}%`, backgroundColor: item.color }} 
-                  title={`${item.label}: ${item.value}%`}
-                />
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {wasteDistribution.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: item.color }} />
-                  <span className="text-xs font-inter text-muted-foreground flex-1">{item.label}</span>
-                  <span className="text-xs font-jetbrains-mono font-medium">{item.value}%</span>
+          <div className="flex flex-col gap-5 justify-center flex-1">
+            {wasteDistribution.map((item, i) => (
+              <div key={i} className="flex flex-col gap-2">
+                <div className="flex items-center justify-between text-xs font-inter">
+                  <span className="text-muted-foreground">{item.label}</span>
+                  <span className="font-jetbrains-mono font-medium">{item.value}%</span>
                 </div>
-              ))}
-            </div>
+                <div className="w-full h-2 bg-background rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full"
+                    style={{ width: `${item.value}%`, backgroundColor: item.color }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

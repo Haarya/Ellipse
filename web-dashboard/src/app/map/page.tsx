@@ -205,12 +205,14 @@ export default function MapPage() {
       <div className="flex-1 w-full h-full p-6">
         <div className="w-full h-full glass-panel-elevated rounded-2xl p-4 overflow-hidden flex flex-col relative z-0">
           <div className="flex-1 w-full h-full relative glow-teal rounded-xl overflow-hidden border border-border-highlight">
-            <IncidentMap 
-              activeLayer={layers.active} 
-              resolvedLayer={layers.resolved} 
-              statusFilter={statusFilter} 
-              severityMin={severityMin} 
-            />
+              <IncidentMap 
+                activeLayer={layers.active} 
+                resolvedLayer={layers.resolved} 
+                heatmapLayer={layers.heatmap}
+                wardsLayer={layers.wards}
+                statusFilter={statusFilter} 
+                severityMin={severityMin} 
+              />
           </div>
         </div>
       </div>
