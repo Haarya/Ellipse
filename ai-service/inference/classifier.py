@@ -82,9 +82,9 @@ class HierarchicalClassifier:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
         self.model, _, self.preprocess = open_clip.create_model_and_transforms(
-            "MobileCLIP-S1", pretrained="datacompdr"
+            "MobileCLIP2-S0", pretrained="dfndr2b"
         )
-        self.tokenizer = open_clip.get_tokenizer("MobileCLIP-S1")
+        self.tokenizer = open_clip.get_tokenizer("MobileCLIP2-S0")
         self.model = self.model.to(self.device)
         self.model.eval()
         

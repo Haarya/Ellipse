@@ -8,11 +8,15 @@ import { ComplaintService } from '../src/services/complaint.service';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ReviewScreen() {
-  const { photoUri, latitude, longitude, heading } = useLocalSearchParams<{ 
+  const { photoUri, latitude, longitude, heading, focalLength, sensorWidth, sensorHeight, zoomRatio } = useLocalSearchParams<{ 
     photoUri: string; 
     latitude: string; 
     longitude: string; 
     heading: string;
+    focalLength?: string;
+    sensorWidth?: string;
+    sensorHeight?: string;
+    zoomRatio?: string;
   }>();
   
   const router = useRouter();
@@ -33,6 +37,10 @@ export default function ReviewScreen() {
         longitude: parseFloat(longitude),
         compassHeading: parseFloat(heading || '0'),
         sizeEstimate: size ? size.toUpperCase() : undefined,
+        focalLength: focalLength ? parseFloat(focalLength) : undefined,
+        sensorWidth: sensorWidth ? parseFloat(sensorWidth) : undefined,
+        sensorHeight: sensorHeight ? parseFloat(sensorHeight) : undefined,
+        zoomRatio: zoomRatio ? parseFloat(zoomRatio) : undefined,
       });
       
       // Success! Navigate to success screen

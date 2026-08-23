@@ -40,13 +40,14 @@ export class InternalController {
         status: 'AI_TRIAGED',
         aiAnalysis: {
           create: {
-            wasteClasses: dto.wasteTypes,
-            logisticsTier: dto.tier,
-            severityScore: dto.severityScore || 0,
-            category: dto.category,
-            sizeEstimate: dto.sizeEstimate,
-            macroCategory: dto.macroCategory,
-            microCategory: dto.microCategory,
+            wasteClasses: dto.classification.wasteTypes,
+            logisticsTier: dto.dispatchRecommendation.tier,
+            severityScore: dto.dispatchRecommendation.severityScore,
+            category: dto.classification.macroCategory,
+            macroCategory: dto.classification.macroCategory,
+            microCategory: dto.classification.microCategory,
+            volumeM3: dto.spatialMetrics.volumeM3,
+            volumeConfidence: dto.spatialMetrics.volumeConfidence === "MEDIUM" ? "MEDIUM" : "LOW",
             // Assuming weight version 1 exists for now, since it's an Int relation
             severityWeightVersionId: 1, 
           },
