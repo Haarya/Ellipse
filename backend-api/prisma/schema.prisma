@@ -59,6 +59,10 @@ model User {
   dispatchOrders  DispatchOrder[]   @relation("CrewDispatches")
   dedupReviews    Complaint[]       @relation("DedupReviewer")
   activityLogs    CitizenActivityLog[]
+  vehicle         VehicleClass?     @map("vehicle")
+  teamSize        Int?              @map("team_size")
+  latitude        Float?
+  longitude       Float?
 
   @@map("users")
 }

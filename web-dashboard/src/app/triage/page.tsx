@@ -46,7 +46,7 @@ export default function TriagePage() {
         {/* Right: MapLibre Map */}
         <div className="min-h-0 flex flex-col glass-panel rounded-xl overflow-hidden hover:border-border-highlight transition-all duration-300 gradient-border-top group hover:-translate-y-1 relative glow-teal">
           <div className="flex-1 min-h-0 relative z-10 border border-border-highlight m-3 rounded-xl overflow-hidden">
-            <IncidentMap />
+            <IncidentMap resolvedLayer={false} />
           </div>
         </div>
       </div>

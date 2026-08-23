@@ -2,7 +2,7 @@
 
 import { useCrewsStore, FieldCrew } from "@/stores/useCrewsStore";
 import { formatDistanceToNow } from "date-fns";
-import { MapPin, Truck, Users } from "lucide-react";
+import { MapPin, Truck, Users, Trash2 } from "lucide-react";
 import { useComplaintsStore } from "@/stores/useComplaintsStore";
 
 const STATUS_CONFIG = {
@@ -28,12 +28,25 @@ function CrewCard({ crew, isSelected, onSelect }: { crew: FieldCrew, isSelected:
     >
       <div className="flex items-center justify-between mb-3">
         <h4 className="font-philosopher font-bold text-foreground text-lg">{crew.name}</h4>
-        <span
-          className="text-xs font-inter font-bold uppercase px-2 py-1 rounded"
-          style={{ background: `${config.color}22`, color: config.color }}
-        >
-          {config.label}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className="text-xs font-inter font-bold uppercase px-2 py-1 rounded"
+            style={{ background: `${config.color}22`, color: config.color }}
+          >
+            {config.label}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const { deleteCrew } = useCrewsStore.getState();
+              deleteCrew(crew.id);
+            }}
+            className="p-1.5 rounded-md text-muted-foreground hover:bg-red-500/20 hover:text-red-400 transition-colors"
+            title="Delete Team"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="space-y-2 mb-3">

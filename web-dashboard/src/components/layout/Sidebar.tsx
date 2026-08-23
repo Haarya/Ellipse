@@ -24,7 +24,6 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Overview", href: "/", icon: LayoutDashboard, roles: ["DISPATCHER", "OFFICER", "ADMIN"] },
   { name: "GIS Map", href: "/map", icon: Map, roles: ["DISPATCHER", "OFFICER", "ADMIN"] },
   { name: "Triage & Dispatch", href: "/triage", icon: ListTodo, roles: ["DISPATCHER", "OFFICER", "ADMIN"] },
-  { name: "Dedup Review", href: "/dedup", icon: GitMerge, roles: ["OFFICER", "ADMIN"] },
   { name: "Field Crews", href: "/crews", icon: Users, roles: ["DISPATCHER", "ADMIN"] },
   { name: "Analytics", href: "/analytics", icon: BarChart3, roles: ["OFFICER", "ADMIN"] },
 ];

@@ -9,6 +9,7 @@ export interface FieldCrew {
   latitude: number;
   longitude: number;
   vehicle: string;
+  teamSize?: number;
   currentAssignmentId?: string;
   lastPing: string;
 }
@@ -21,7 +22,8 @@ interface CrewsState {
   fetchCrews: () => Promise<void>;
   setCrews: (crews: FieldCrew[]) => void;
   selectCrew: (id: string | null) => void;
-  addCrew: (crewData: { name: string; vehicle: string; zone: string }) => Promise<void>;
+  addCrew: (crewData: { name: string; vehicle: string; zone?: string; teamSize: number; latitude: number; longitude: number }) => Promise<void>;
+  deleteCrew: (id: string) => Promise<void>;
 }
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -46,7 +48,7 @@ export const useCrewsStore = create<CrewsState>((set) => ({
   },
   setCrews: (crews) => set({ crews }),
   selectCrew: (id) => set({ selectedCrewId: id }),
-  addCrew: async (crewData: { name: string; vehicle: string; zone: string }) => {
+  addCrew: async (crewData: { name: string; vehicle: string; zone?: string; teamSize: number; latitude: number; longitude: number }) => {
     try {
       const res = await fetch("http://localhost:3000/api/v1/internal/crews", {
         method: "POST",
@@ -61,6 +63,23 @@ export const useCrewsStore = create<CrewsState>((set) => ({
       set((state) => ({ crews: [...state.crews, newCrew] }));
     } catch (error) {
       console.error("Failed to add crew", error);
+    }
+  },
+  deleteCrew: async (id: string) => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/v1/internal/crews/${id}`, {
+        method: "DELETE",
+        headers: {
+          "x-ai-service-secret": "ellipse-ai-webhook-secret-67890"
+        }
+      });
+      if (!res.ok) throw new Error("Failed to delete crew");
+      set((state) => ({
+        crews: state.crews.filter((c) => c.id !== id),
+        selectedCrewId: state.selectedCrewId === id ? null : state.selectedCrewId
+      }));
+    } catch (error) {
+      console.error("Failed to delete crew", error);
     }
   }
 }));

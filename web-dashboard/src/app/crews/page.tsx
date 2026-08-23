@@ -3,8 +3,9 @@
 import dynamic from "next/dynamic";
 import { CrewList } from "@/components/crews/CrewList";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCrewsStore } from "@/stores/useCrewsStore";
+import { useComplaintsStore } from "@/stores/useComplaintsStore";
 
 const IncidentMap = dynamic(
   () => import("@/components/map/IncidentMap").then((m) => m.IncidentMap),
@@ -23,14 +24,38 @@ const IncidentMap = dynamic(
 
 export default function CrewsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newCrew, setNewCrew] = useState({ name: "", vehicle: "MINI_TRUCK", zone: "" });
+  const [newCrew, setNewCrew] = useState({ name: "", vehicle: "MINI_TRUCK", teamSize: 2, targetComplaintId: "" });
   const { addCrew } = useCrewsStore();
+  const { complaints } = useComplaintsStore();
+
+  const activeComplaints = complaints.filter(
+    (c) => c.status !== "RESOLVED" && c.status !== "REJECTED" && c.status !== "DUPLICATE"
+  );
+
+  // Set default selected complaint when modal opens if none is selected
+  useEffect(() => {
+    if (isModalOpen && !newCrew.targetComplaintId && activeComplaints.length > 0) {
+      setNewCrew(prev => ({ ...prev, targetComplaintId: activeComplaints[0].id }));
+    }
+  }, [isModalOpen, activeComplaints, newCrew.targetComplaintId]);
 
   const handleAddCrew = async () => {
     if (!newCrew.name) return;
-    await addCrew(newCrew);
+    
+    const selectedComplaint = activeComplaints.find(c => c.id === newCrew.targetComplaintId) || activeComplaints[0];
+    const defaultCoords = { lat: 19.076, lng: 72.8777 }; // Central Mumbai
+    const lat = selectedComplaint ? selectedComplaint.latitude : defaultCoords.lat;
+    const lng = selectedComplaint ? selectedComplaint.longitude : defaultCoords.lng;
+
+    await addCrew({
+      name: newCrew.name,
+      vehicle: newCrew.vehicle,
+      teamSize: newCrew.teamSize,
+      latitude: lat,
+      longitude: lng,
+    });
     setIsModalOpen(false);
-    setNewCrew({ name: "", vehicle: "MINI_TRUCK", zone: "" });
+    setNewCrew({ name: "", vehicle: "MINI_TRUCK", teamSize: 2, targetComplaintId: "" });
   };
 
   return (
@@ -64,7 +89,7 @@ export default function CrewsPage() {
             <h3 className="font-semibold text-foreground font-inter text-sm">Live Location Feed</h3>
           </div>
           <div className="flex-1 min-h-0 relative">
-            <IncidentMap showCrews={true} />
+            <IncidentMap showCrews={true} resolvedLayer={false} />
           </div>
         </div>
       </div>
@@ -98,6 +123,44 @@ export default function CrewsPage() {
                 <option value="MANUAL_SWEEP">Manual Sweep</option>
               </select>
             </div>
+            
+            <div className="flex flex-col gap-2">
+              <label className="text-sm text-muted-foreground">Team Size</label>
+              <input 
+                type="number"
+                min="1"
+                max="10"
+                value={newCrew.teamSize}
+                onChange={(e) => setNewCrew({ ...newCrew, teamSize: parseInt(e.target.value) || 2 })}
+                className="bg-surface border border-border p-2 rounded-lg text-sm text-foreground focus:outline-none focus:border-accent-lime"
+              />
+            </div>
+
+            {activeComplaints.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm text-muted-foreground">Target Complaint (Deployment Location)</label>
+                <select 
+                  value={newCrew.targetComplaintId}
+                  onChange={(e) => setNewCrew({ ...newCrew, targetComplaintId: e.target.value })}
+                  className="bg-surface border border-border p-2 rounded-lg text-sm text-foreground focus:outline-none focus:border-accent-lime"
+                >
+                  {activeComplaints.map(c => {
+                    const category = c.aiAnalysis?.macroCategory || c.aiAnalysis?.category || "Unknown Type";
+                    return (
+                      <option key={c.id} value={c.id}>
+                        Complaint #{c.id.slice(-5).toUpperCase()} - {category}
+                      </option>
+                    )
+                  })}
+                </select>
+              </div>
+            )}
+            
+            {activeComplaints.length === 0 && (
+              <div className="bg-surface-subtle border border-border-subtle p-3 rounded-lg text-xs text-muted-foreground">
+                No active complaints available for deployment. The crew will be stationed at the Central Base.
+              </div>
+            )}
 
             <div className="flex justify-end gap-3 mt-4">
               <button 
