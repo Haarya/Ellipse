@@ -48,6 +48,7 @@ export class InternalController {
             microCategory: dto.classification.microCategory,
             volumeM3: dto.spatialMetrics.volumeM3,
             volumeConfidence: dto.spatialMetrics.volumeConfidence === "MEDIUM" ? "MEDIUM" : "LOW",
+            hazardFlags: dto.dispatchRecommendation.hazardFlags,
             // Assuming weight version 1 exists for now, since it's an Int relation
             severityWeightVersionId: 1, 
           },
