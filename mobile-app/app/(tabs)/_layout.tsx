@@ -1,8 +1,12 @@
 import { Tabs } from 'expo-router';
 import { colors } from '../../src/theme/colors';
-import { Map, Trophy, User, FileText } from 'lucide-react-native';
+import { Map, Trophy, User, FileText, ClipboardList } from 'lucide-react-native';
+import { useAuthStore } from '../../src/stores/auth.store';
 
 export default function TabLayout() {
+  const { user } = useAuthStore();
+  const isCrew = user?.role === 'FIELD_CREW';
+
   return (
     <Tabs
       screenOptions={{
@@ -19,14 +23,15 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Map',
-          tabBarIcon: ({ color, size }) => <Map color={color} size={size} />,
+          title: isCrew ? 'Tasks' : 'Map',
+          tabBarIcon: ({ color, size }) => isCrew ? <ClipboardList color={color} size={size} /> : <Map color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="leaderboard"
         options={{
           title: 'Leaderboard',
+          href: isCrew ? null : undefined,
           tabBarIcon: ({ color, size }) => <Trophy color={color} size={size} />,
         }}
       />
@@ -34,6 +39,7 @@ export default function TabLayout() {
         name="my-reports"
         options={{
           title: 'My Reports',
+          href: isCrew ? null : undefined,
           tabBarIcon: ({ color, size }) => <FileText color={color} size={size} />,
         }}
       />

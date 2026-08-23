@@ -157,7 +157,7 @@ export default function TabOneScreen() {
                 <View style={[styles.statusDot, { backgroundColor: getSeverityColor(complaint.aiAnalysis?.severityScore, complaint.status) }]} />
                 <View style={styles.listTextContainer}>
                   <Text style={styles.listTitle}>
-                    {complaint.aiAnalysis?.wasteTypes?.[0] || 'Unclassified Waste'}
+                    {complaint.aiAnalysis?.microCategory || complaint.aiAnalysis?.macroCategory || complaint.aiAnalysis?.wasteClasses?.[0] || 'Unclassified Waste'}
                   </Text>
                   <Text style={styles.listSubtitle}>
                     {new Date(complaint.createdAt).toLocaleDateString()} • {complaint.status}

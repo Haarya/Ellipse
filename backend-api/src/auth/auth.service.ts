@@ -13,6 +13,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    this.redis.on('error', (err) => {
+      console.warn('[Redis] Connection error in AuthService:', err.message);
+    });
   }
 
   private generateOtp(): string {

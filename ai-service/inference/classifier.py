@@ -77,7 +77,7 @@ class HierarchicalClassifier:
     """
 
     def __init__(self):
-        logger.info("Loading MobileCLIP-S0 model (pre-warming)...")
+        logger.info("Loading MobileCLIP-S1 model (pre-warming)...")
         
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         

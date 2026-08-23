@@ -8,6 +8,9 @@ export class RateLimitGuard implements CanActivate {
 
   constructor(private prisma: PrismaService) {
     this.redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    this.redis.on('error', (err) => {
+      console.warn('[Redis] Connection error in RateLimitGuard:', err.message);
+    });
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

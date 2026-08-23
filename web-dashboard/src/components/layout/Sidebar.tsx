@@ -27,7 +27,6 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Dedup Review", href: "/dedup", icon: GitMerge, roles: ["OFFICER", "ADMIN"] },
   { name: "Field Crews", href: "/crews", icon: Users, roles: ["DISPATCHER", "ADMIN"] },
   { name: "Analytics", href: "/analytics", icon: BarChart3, roles: ["OFFICER", "ADMIN"] },
-  { name: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN"] },
 ];
 
 export function Sidebar() {

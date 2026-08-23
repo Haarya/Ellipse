@@ -62,7 +62,7 @@ export default function DashboardOverview() {
             <h3 className="font-semibold text-text-primary font-inter">Live Incident Map</h3>
           </div>
           <div className="flex-1 min-h-0 relative glow-teal rounded-xl overflow-hidden border border-border-highlight">
-            <IncidentMap />
+            <IncidentMap activeLayer={true} resolvedLayer={false} />
           </div>
         </div>
 
@@ -72,15 +72,21 @@ export default function DashboardOverview() {
             <h3 className="font-semibold text-text-primary font-inter">Recent Activity</h3>
           </div>
           <div className="flex-1 space-y-4 overflow-y-auto pt-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex gap-3 items-start border-b border-border-subtle pb-4 last:border-0 hover:bg-surface-subtle/50 p-2 rounded-lg transition-colors cursor-default">
-                <div className="w-2 h-2 mt-2 rounded-full bg-accent-lime shadow-[0_0_8px_rgba(227,239,38,0.6)] flex-shrink-0" />
-                <div>
-                  <p className="text-sm text-text-primary font-inter">New complaint logged in Zone {i}</p>
-                  <p className="text-xs text-text-muted font-inter mt-1">{i * 5} mins ago</p>
+            {complaints.length > 0 ? (
+              complaints.slice(0, 5).map((complaint) => (
+                <div key={complaint.id} className="flex gap-3 items-start border-b border-border-subtle pb-4 last:border-0 hover:bg-surface-subtle/50 p-2 rounded-lg transition-colors cursor-default">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-accent-lime shadow-[0_0_8px_rgba(227,239,38,0.6)] flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-text-primary font-inter">New complaint logged: {complaint.status}</p>
+                    <p className="text-xs text-text-muted font-inter mt-1">
+                      {new Date(complaint.createdAt).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-text-muted font-inter p-2">No recent activity.</p>
+            )}
           </div>
         </div>
       </div>
