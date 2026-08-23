@@ -105,7 +105,7 @@ export default function ComplaintDetailScreen() {
 
         <View style={styles.cardRow}>
           <Text style={styles.cardLabel}>Category:</Text>
-          <Text style={styles.cardValue}>{ai.microCategory || ai.macroCategory || ai.category || 'N/A'}</Text>
+          <Text style={styles.cardValue}>{ai.macroCategory || ai.category || 'N/A'}</Text>
         </View>
 
         {ai.microCategory && (
@@ -117,7 +117,7 @@ export default function ComplaintDetailScreen() {
 
         <View style={styles.cardRow}>
           <Text style={styles.cardLabel}>Waste Types:</Text>
-          <Text style={styles.cardValue}>{ai.wasteTypes?.length > 0 ? ai.wasteTypes.join(', ') : 'No garbage detected'}</Text>
+          <Text style={styles.cardValue}>{ai.wasteClasses?.length > 0 ? ai.wasteClasses.join(', ') : 'No garbage detected'}</Text>
         </View>
 
         <View style={styles.cardRow}>
