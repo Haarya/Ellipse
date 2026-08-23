@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 from .detector import GarbageDetector
 from .classifier import HierarchicalClassifier
 from .severity import compute_severity
-from .volume import VolumeEstimator
 import numpy as np
 
 
@@ -14,7 +13,6 @@ class AIPipeline:
     def __init__(self, detector_path: str):
         self.detector = GarbageDetector(detector_path)
         self.classifier = HierarchicalClassifier()
-        self.volume = VolumeEstimator()
         # Thread pool for CPU-bound or non-async models
         self.executor = ThreadPoolExecutor(max_workers=2)
 
@@ -28,16 +26,12 @@ class AIPipeline:
 
     async def run_pipeline(self, image: Image.Image, metadata: dict):
         """
-        Executes YOLO and Depth concurrently. 
-        Then runs MobileCLIP sequentially on crops.
+        Executes YOLO and then runs MobileCLIP sequentially on crops.
         """
         loop = asyncio.get_event_loop()
         
-        # 1. Detect garbage regions and estimate depth concurrently
-        detections_future = loop.run_in_executor(self.executor, self.detector.detect, image)
-        depth_future = loop.run_in_executor(self.executor, self.volume.estimate_depth, image)
-        
-        detections, depth_z = await asyncio.gather(detections_future, depth_future)
+        # 1. Detect garbage regions
+        detections = await loop.run_in_executor(self.executor, self.detector.detect, image)
         
         manual_size_estimate = metadata.get("sizeEstimate")
         
@@ -67,9 +61,7 @@ class AIPipeline:
                 }
             }
 
-        # 2. Extract bounding box mask for volume estimation
         W, H = image.size
-        mask = np.zeros((H, W), dtype=np.uint8)
         
         classifications = []
         for det in detections:
@@ -82,22 +74,17 @@ class AIPipeline:
             
             if x2 <= x1 or y2 <= y1:
                 continue
-                
-            mask[y1:y2, x1:x2] = 255
             
             # Run MobileCLIP on the crop
             crop = image.crop((x1, y1, x2, y2))
             cls_result = self.classifier.classify(crop)
             classifications.append(cls_result)
             
-        # 3. Volume estimation using depth map, mask, and EXIF metadata
-        volume_metrics = self.volume.unproject_and_integrate(depth_z, mask, metadata)
-        
-        # 4. Compute severity
-        severity_result = compute_severity(detections, classifications, volume_metrics)
+        # 2. Compute severity (no volume metrics passed)
+        severity_result = compute_severity(detections, classifications)
         unique_classes = list(set([c["class"] for c in classifications]))
         
-        # 5. Aggregate hierarchical labels (best crop)
+        # 3. Aggregate hierarchical labels (best crop)
         if classifications:
             best_crop = max(classifications, key=lambda c: c["macro_score"])
             macro_cat = best_crop["macro_label"]
@@ -109,13 +96,16 @@ class AIPipeline:
             macro_conf = 0.0
             micro_cat = None
             micro_conf = 0.0
+            
+        # Dummy volume estimation proxy using bounding box count
+        dummy_volume = len(detections) * 0.1
         
         action = "STANDARD COLLECTION"
         h_flags = severity_result["hazardFlags"]
         
         if h_flags:
             action = "HAZMAT DISPATCH"
-        elif volume_metrics.get("volumeM3", 0.0) > 2.0:
+        elif dummy_volume > 2.0:
             action = "HEAVY MACHINERY DISPATCH"
         elif severity_result["severityScore"] > 0.75:
             action = "CRITICAL DISPATCH"
@@ -129,9 +119,13 @@ class AIPipeline:
                 "wasteTypes": unique_classes
             },
             "spatialMetrics": {
-                "volumeM3": volume_metrics["volumeM3"],
-                "volumeConfidence": "MEDIUM" if metadata.get("focalLength") else "LOW",
-                "dimensions": volume_metrics["dimensions"]
+                "volumeM3": round(dummy_volume, 2),
+                "volumeConfidence": "LOW",
+                "dimensions": {
+                    "widthMeters": 0.0,
+                    "lengthMeters": 0.0,
+                    "peakHeightMeters": 0.0
+                }
             },
             "dispatchRecommendation": {
                 "severityScore": severity_result["severityScore"],
