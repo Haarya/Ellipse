@@ -3,10 +3,15 @@ uvicorn
 onnxruntime
 Pillow
 httpx
-numpy
 python-dotenv
 python-multipart
 pydantic
 opencv-python-headless
 torch --index-url https://download.pytorch.org/whl/cpu
+torchvision --index-url https://download.pytorch.org/whl/cpu
 open_clip_torch
+timm
+transformers
+scikit-learn
+scipy
+ultralytics

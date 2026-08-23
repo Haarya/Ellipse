@@ -6,6 +6,10 @@ export interface CreateComplaintParams {
   longitude: number;
   compassHeading?: number;
   sizeEstimate?: string;
+  focalLength?: number;
+  sensorWidth?: number;
+  sensorHeight?: number;
+  zoomRatio?: number;
 }
 
 export class ComplaintService {
@@ -34,6 +38,11 @@ export class ComplaintService {
     if (params.sizeEstimate) {
       formData.append('sizeEstimate', params.sizeEstimate);
     }
+    
+    if (params.focalLength !== undefined) formData.append('focalLength', params.focalLength.toString());
+    if (params.sensorWidth !== undefined) formData.append('sensorWidth', params.sensorWidth.toString());
+    if (params.sensorHeight !== undefined) formData.append('sensorHeight', params.sensorHeight.toString());
+    if (params.zoomRatio !== undefined) formData.append('zoomRatio', params.zoomRatio.toString());
 
     const response = await api.post('/citizen/complaints', formData, {
       headers: {

@@ -22,4 +22,24 @@ export class CreateComplaintDto {
   @IsOptional()
   @IsString()
   sizeEstimate?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  focalLength?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  sensorWidth?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  sensorHeight?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber()
+  zoomRatio?: number;
 }

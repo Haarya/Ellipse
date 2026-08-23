@@ -49,6 +49,10 @@ export class ComplaintsService {
           complaintId: complaint.id,
           imageUrl: photoUrl,
           sizeEstimate: dto.sizeEstimate,
+          focalLength: dto.focalLength,
+          sensorWidth: dto.sensorWidth,
+          sensorHeight: dto.sensorHeight,
+          zoomRatio: dto.zoomRatio,
         }),
       }).catch(err => console.error('Failed to call AI service:', err));
     } catch (error) {

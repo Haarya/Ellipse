@@ -46,14 +46,26 @@ export default function CameraScreen() {
           return;
         }
 
-        // Navigate to review screen with photo and location
+        // Extract EXIF data if available
+        const exif = photo.exif || {};
+        const focalLength = exif.FocalLength || 26.0; // Default wide angle equivalent
+        // Most smartphones have ~1/2.55" sensor -> roughly 5.76mm x 4.29mm
+        const sensorWidth = 5.76;
+        const sensorHeight = 4.29;
+        const zoomRatio = 1.0; // Since pinch-to-zoom is not currently implemented in UI
+
+        // Navigate to review screen with photo, location, and EXIF
         router.push({
           pathname: '/review',
           params: { 
             photoUri: photo?.uri,
             latitude: location.latitude.toString(),
             longitude: location.longitude.toString(),
-            heading: location.heading?.toString() || '0'
+            heading: location.heading?.toString() || '0',
+            focalLength: focalLength.toString(),
+            sensorWidth: sensorWidth.toString(),
+            sensorHeight: sensorHeight.toString(),
+            zoomRatio: zoomRatio.toString()
           }
         });
       } catch (error) {
