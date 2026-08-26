@@ -146,21 +146,6 @@ npx expo start                   # Scan QR with Expo Go
 
 ---
 
-## 🌐 Deployment
-
-See the full deployment guide in `docs/DEPLOYMENT.md` for deploying to:
-
-| Service | Platform |
-|---------|----------|
-| Backend API | Render |
-| AI Service | Railway |
-| Web Dashboard | Vercel |
-| Mobile App | Expo EAS Build |
-
-**Estimated cost:** $5–12/month (mostly free tiers)
-
----
-
 ## 🔐 Environment Variables
 
 | Variable | Used By | Description |
