@@ -140,7 +140,7 @@ export default function ComplaintDetailScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.imageContainer}>
-          <Image source={{ uri: complaint.photoUrl }} style={styles.image} />
+          <Image source={{ uri: complaint.rawImageUrl }} style={styles.image} />
         </View>
 
         {renderTimeline()}

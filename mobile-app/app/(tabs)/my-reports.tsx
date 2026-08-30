@@ -4,6 +4,7 @@ import { ComplaintService } from '../../src/services/complaint.service';
 import { colors } from '../../src/theme/colors';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { MapPin, Navigation, FileText, CheckCircle } from 'lucide-react-native';
+import { useAuthStore } from '../../src/stores/auth.store';
 
 const getSeverityColor = (score?: number, status?: string) => {
   if (status === 'RESOLVED') return colors.lime;
@@ -17,8 +18,14 @@ export default function MyReportsScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { user } = useAuthStore();
 
   const fetchComplaints = async () => {
+    if (user?.role !== 'CITIZEN') {
+      setLoading(false);
+      return;
+    }
+
     try {
       const data = await ComplaintService.getMyComplaints();
       setComplaints(data);

@@ -119,50 +119,49 @@ export default function CameraScreen() {
         facing="back"
         ref={cameraRef}
         animateShutter={false}
-      >
-        <View style={styles.overlay}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-              <X color={colors.white} size={24} />
-            </TouchableOpacity>
-            
-            <View style={[styles.gpsBadge, location ? styles.gpsActive : styles.gpsSearching]}>
-              <MapPin color={colors.white} size={16} />
-              <Text style={styles.gpsText}>
-                {isGettingLocation ? 'Acquiring GPS...' : location ? 'GPS Locked' : 'No GPS'}
-              </Text>
-            </View>
-          </View>
-
-          {/* Footer controls */}
-          <View style={styles.footer}>
-            <View style={styles.warningContainer}>
-              <Text style={styles.warningText}>Ensure the waste is clearly visible</Text>
-            </View>
-            
-            <View style={styles.captureContainer}>
-              <View style={styles.captureSpacer}>
-                <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isProcessing}>
-                  <ImageIcon color={colors.white} size={24} />
-                </TouchableOpacity>
-              </View>
-              <TouchableOpacity 
-                style={[styles.captureButton, (!location || isProcessing) && styles.captureButtonDisabled]} 
-                onPress={takePicture}
-                disabled={!location || isProcessing}
-              >
-                {isProcessing ? (
-                  <ActivityIndicator color={colors.forest} size="large" />
-                ) : (
-                  <View style={styles.captureInner} />
-                )}
-              </TouchableOpacity>
-              <View style={styles.captureSpacer} />
-            </View>
+      />
+      <View style={styles.overlay}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+            <X color={colors.white} size={24} />
+          </TouchableOpacity>
+          
+          <View style={[styles.gpsBadge, location ? styles.gpsActive : styles.gpsSearching]}>
+            <MapPin color={colors.white} size={16} />
+            <Text style={styles.gpsText}>
+              {isGettingLocation ? 'Acquiring GPS...' : location ? 'GPS Locked' : 'No GPS'}
+            </Text>
           </View>
         </View>
-      </CameraView>
+
+        {/* Footer controls */}
+        <View style={styles.footer}>
+          <View style={styles.warningContainer}>
+            <Text style={styles.warningText}>Ensure the waste is clearly visible</Text>
+          </View>
+          
+          <View style={styles.captureContainer}>
+            <View style={styles.captureSpacer}>
+              <TouchableOpacity style={styles.uploadButton} onPress={pickImage} disabled={isProcessing}>
+                <ImageIcon color={colors.white} size={24} />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity 
+              style={[styles.captureButton, (!location || isProcessing) && styles.captureButtonDisabled]} 
+              onPress={takePicture}
+              disabled={!location || isProcessing}
+            >
+              {isProcessing ? (
+                <ActivityIndicator color={colors.forest} size="large" />
+              ) : (
+                <View style={styles.captureInner} />
+              )}
+            </TouchableOpacity>
+            <View style={styles.captureSpacer} />
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   overlay: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'space-between',
     backgroundColor: 'rgba(0,0,0,0.1)',
   },

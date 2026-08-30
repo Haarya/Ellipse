@@ -48,29 +48,30 @@ export function IncidentMap({
   wardsLayer = false
 }: IncidentMapProps = {}) {
   const mapStyle: StyleSpecification = useMemo(() => {
-    const baseUrl = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png";
+    const mapTilerKey = process.env.NEXT_PUBLIC_MAPTILER_KEY;
+    
+    // MapTiler Raster URL (bypasses the Next.js Web Worker bug for vector tiles)
+    const maptilerUrl = `https://api.maptiler.com/maps/darkmatter/256/{z}/{x}/{y}.png?key=${mapTilerKey}`;
+    // Fallback to OpenStreetMap if key is missing
+    const fallbackUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+    
+    const tileUrl = mapTilerKey ? maptilerUrl : fallbackUrl;
 
     return {
       version: 8,
       sources: {
-        carto_base: {
+        raster_base: {
           type: "raster",
-          tiles: [
-            baseUrl.replace("{s}", "a"),
-            baseUrl.replace("{s}", "b"),
-            baseUrl.replace("{s}", "c"),
-            baseUrl.replace("{s}", "d"),
-          ],
+          tiles: [tileUrl],
           tileSize: 256,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          attribution: '&copy; <a href="https://maptiler.com">MapTiler</a> &copy; <a href="https://openstreetmap.org">OpenStreetMap</a>',
         },
       },
       layers: [
         {
-          id: "carto_base_layer",
+          id: "raster_base_layer",
           type: "raster",
-          source: "carto_base",
+          source: "raster_base",
           minzoom: 0,
           maxzoom: 22,
         },
